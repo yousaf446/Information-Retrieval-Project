@@ -14,7 +14,9 @@ import java.util.stream.Collectors;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.bayes.NaiveBayesMultinomial;
 import weka.classifiers.lazy.IBk;
+import weka.classifiers.meta.ClassificationViaRegression;
 import weka.classifiers.meta.FilteredClassifier;
 import weka.core.*;
 import weka.core.stemmers.LovinsStemmer;
@@ -183,14 +185,35 @@ public class KNNSentences {
 			bReader.close();
 
 			IBk ibk = new IBk();
+			ibk.setKNN(3);
 			ibk.buildClassifier(train);
-			Evaluation eval = new Evaluation(train);
-			eval.crossValidateModel(ibk, train, 10, new Random(1));
-			System.out.println(eval.toSummaryString("\nResults\n=====\n", true));
-			System.out.println("FMeasure is " + String.format("%.2f", eval.fMeasure(1) * 100) + "%");
-			System.out.println("Precision is " + String.format("%.2f", eval.precision(1) * 100) + "%");
-			System.out.println("Recall is " + String.format("%.2f", eval.recall(1) * 100) + "%");
-			System.out.println("Confusion Matrix is " + eval.toMatrixString());
+			Evaluation evalIBK = new Evaluation(train);
+			evalIBK.crossValidateModel(ibk, train, 10, new Random(1));
+			System.out.println(evalIBK.toSummaryString("\nResults\n=====\n", true));
+			System.out.println("KNN FMeasure is " + String.format("%.2f", evalIBK.fMeasure(1) * 100) + "%");
+			System.out.println("KNN Precision is " + String.format("%.2f", evalIBK.precision(1) * 100) + "%");
+			System.out.println("KNN Recall is " + String.format("%.2f", evalIBK.recall(1) * 100) + "%");
+			System.out.println("KNN Confusion Matrix is " + evalIBK.toMatrixString());
+			
+			NaiveBayesMultinomial nb = new NaiveBayesMultinomial();
+			nb.buildClassifier(train);
+			Evaluation evalNaive = new Evaluation(train);
+			evalNaive.evaluateModel(nb, train);
+			System.out.println(evalNaive.toSummaryString("\nResults\n=====\n", true));
+			System.out.println("Naive Bayes FMeasure is " + String.format("%.2f", evalNaive.fMeasure(1) * 100) + "%");
+			System.out.println("Naive Bayes Precision is " + String.format("%.2f", evalNaive.precision(1) * 100) + "%");
+			System.out.println("Naive Bayes Recall is " + String.format("%.2f", evalNaive.recall(1) * 100) + "%");
+			System.out.println("Naive Bayes Confusion Matrix is " + evalNaive.toMatrixString());
+			
+			ClassificationViaRegression rochio = new ClassificationViaRegression();
+			rochio.buildClassifier(train);
+			Evaluation evalRochio = new Evaluation(train);
+			evalRochio.crossValidateModel(rochio, train, 10, new Random(1));
+			System.out.println(evalRochio.toSummaryString("\nResults\n=====\n", true));
+			System.out.println("Rochio FMeasure is " + String.format("%.2f", evalRochio.fMeasure(1) * 100) + "%");
+			System.out.println("Rochio Precision is " + String.format("%.2f", evalRochio.precision(1) * 100) + "%");
+			System.out.println("Rochio Recall is " + String.format("%.2f", evalRochio.recall(1) * 100) + "%");
+			System.out.println("Rochio Confusion Matrix is " + evalRochio.toMatrixString());
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 			e.printStackTrace();
